@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: #111111;
+  font-family: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: #0070F3; color: #fff; }
+
+a { color: inherit; -webkit-tap-highlight-color: transparent; }
+
+input, select, textarea {
+  font: inherit;
+  outline: none;
+  border-radius: 6px;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #0070F3 !important;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.12);
+}
+
+/* thin scrollbars */
+::-webkit-scrollbar { height: 8px; width: 8px; }
+::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* light table row hover */
+tbody tr:hover { background: #FAFAFA; }
