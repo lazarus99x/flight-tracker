@@ -7,7 +7,8 @@ const LOCAL_FILE = path.join(process.cwd(), "data", "tickets.json");
 
 function kvCreds() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  const token =
+    process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
   return { url, token };
 }
@@ -17,7 +18,10 @@ async function kv(cmd: unknown[]): Promise<unknown> {
   if (!c) throw new Error("KV not configured");
   const res = await fetch(c.url, {
     method: "POST",
-    headers: { Authorization: "Bearer " + c.token, "Content-Type": "application/json" },
+    headers: {
+      Authorization: "Bearer " + c.token,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(cmd),
     cache: "no-store",
   });
@@ -69,7 +73,9 @@ export async function findTicket(pnr: string): Promise<Ticket | null> {
 }
 
 export function newId(): string {
-  return (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)).toUpperCase();
+  return (
+    Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+  ).toUpperCase();
 }
 
 const PNR_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
@@ -94,7 +100,7 @@ function hash(s: string): number {
 }
 
 export function seatFor(row: Ticket): string {
-  return `${18 + hash(row.pnr) % 25}${"ABCDEFGHJK"[hash(row.pnr + "x") % 9]}`;
+  return `${18 + (hash(row.pnr) % 25)}${"ABCDEFGHJK"[hash(row.pnr + "x") % 9]}`;
 }
 
 /* ── Seed data ──────────────────────────────────── */
@@ -115,8 +121,8 @@ async function seedFlights(rows: Ticket[]): Promise<void> {
     fromCity: "Toronto",
     toCode: "EWR",
     toCity: "Newark (New York)",
-    departAt: "2026-10-14T20:55:00Z",
-    arriveAt: "2026-10-16T22:30:00Z",
+    departAt: "2026-10-22T20:55:00Z",
+    arriveAt: "2026-10-22T21:30:00Z",
     passengerName: "Bruce Jackson",
     passengerEmail: "brucejackson998@gmail.com",
     passengerPhone: "+1 (437) 998-0147",
@@ -124,7 +130,7 @@ async function seedFlights(rows: Ticket[]): Promise<void> {
     cabin: "First",
     fare: 0,
     status: "confirmed",
-    issuedAt: "2026-10-14T00:00:00Z",
+    issuedAt: "2026-10-22T00:00:00Z",
   };
   rows.push(ticket);
   await saveTickets(rows);

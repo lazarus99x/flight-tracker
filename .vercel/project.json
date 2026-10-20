@@ -1,1 +1,16 @@
-{"projectId":"prj_OWpt3OFH7QVeK53OfMpno5waFKHD","orgId":"team_aFKjSOe9aGHh0bdI4M6T44B3","projectName":"flight-tracker"}
+{
+  "projectId": "prj_OWpt3OFH7QVeK53OfMpno5waFKHD",
+  "orgId": "team_aFKjSOe9aGHh0bdI4M6T44B3",
+  "projectName": "flight-tracker",
+  "settings": {
+    "createdAt": 1791834121216,
+    "framework": "nextjs",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}
