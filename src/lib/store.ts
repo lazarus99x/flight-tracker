@@ -138,14 +138,14 @@ const SEED_TICKETS: Ticket[] = [
     fromCity: "Amman",
     toCode: "BOS",
     toCity: "Boston",
-    departAt: "2026-12-15T08:05:00Z", // 11:05 Asia/Amman
-    arriveAt: "2026-12-15T23:05:00Z", // 18:05 America/New_York (EST)
+    departAt: "2026-11-19T08:05:00Z", // 11:05 Asia/Amman
+    arriveAt: "2026-11-19T23:05:00Z", // 18:05 America/New_York (EST)
     via: {
       code: "IST",
       city: "Istanbul",
       flightNumber: "TK 81",
-      arriveAt: "2026-12-15T10:50:00Z", // 13:50 Europe/Istanbul
-      departAt: "2026-12-15T12:40:00Z", // 15:40 Europe/Istanbul
+      arriveAt: "2026-11-19T10:50:00Z", // 13:50 Europe/Istanbul
+      departAt: "2026-11-19T12:40:00Z", // 15:40 Europe/Istanbul
     },
     passengerName: "Jace Richard",
     passengerEmail: "jace.richard@example.com",
