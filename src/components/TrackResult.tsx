@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { fmtTime, fmtDate, fmtDuration } from "@/lib/format";
 import { AIRLINES } from "@/lib/airlines";
+import { findAirport } from "@/lib/airports";
 import type { Ticket } from "@/lib/types";
 
 const SEAT_URL = "https://www.seatguru.com";
@@ -106,6 +107,12 @@ export default function TrackResult({ code }: { code: string }) {
         const durMinutes = Math.round((arr.getTime() - dep.getTime()) / 60000);
         const bClass = bookingClass(ticket.cabin);
         const fBasis = fareBasis(ticket.cabin);
+        const depTz = findAirport(ticket.fromCode)?.tz;
+        const arrTz = findAirport(ticket.toCode)?.tz;
+        const viaTz = ticket.via ? findAirport(ticket.via.code)?.tz : undefined;
+        const layoverMin = ticket.via
+          ? Math.round((new Date(ticket.via.departAt).getTime() - new Date(ticket.via.arriveAt).getTime()) / 60000)
+          : 0;
 
         return (
           <div style={{ marginTop: 32 }}>
@@ -164,10 +171,10 @@ export default function TrackResult({ code }: { code: string }) {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
                   {/* departure */}
                   <div style={{ textAlign: "left", flex: 1, minWidth: 140 }}>
-                    <p style={{ fontSize: 30, fontWeight: 700, fontFamily: "var(--font-geist-mono)", color: "#111" }}>{fmtTime(ticket.departAt)}</p>
+                    <p style={{ fontSize: 30, fontWeight: 700, fontFamily: "var(--font-geist-mono)", color: "#111" }}>{fmtTime(ticket.departAt, depTz)}</p>
                     <p style={{ fontSize: 14, fontWeight: 600, color: "#111", fontFamily: "var(--font-geist-mono)" }}>{ticket.fromCode}</p>
                     <p style={{ fontSize: 13, color: "#6B6B6B" }}>{ticket.fromCity}</p>
-                    <p style={{ fontSize: 12, color: "#9B9B9B", marginTop: 2 }}>{fmtDate(ticket.departAt, undefined, false)}</p>
+                    <p style={{ fontSize: 12, color: "#9B9B9B", marginTop: 2 }}>{fmtDate(ticket.departAt, depTz, false)}</p>
                   </div>
 
                   {/* flight arc */}
@@ -178,17 +185,38 @@ export default function TrackResult({ code }: { code: string }) {
                       <span style={{ fontSize: 16 }}>✈</span>
                       <div style={{ flex: 1, height: 2, background: "#D4D4D4" }} />
                     </div>
-                    <p style={{ fontSize: 11, color: "#9B9B9B", marginTop: 2 }}>non-stop</p>
+                    <p style={{ fontSize: 11, color: "#9B9B9B", marginTop: 2 }}>{ticket.via ? `1 stop · ${ticket.via.code}` : "non-stop"}</p>
                   </div>
 
                   {/* arrival */}
                   <div style={{ textAlign: "right", flex: 1, minWidth: 140 }}>
-                    <p style={{ fontSize: 30, fontWeight: 700, fontFamily: "var(--font-geist-mono)", color: "#111" }}>{fmtTime(ticket.arriveAt)}</p>
+                    <p style={{ fontSize: 30, fontWeight: 700, fontFamily: "var(--font-geist-mono)", color: "#111" }}>{fmtTime(ticket.arriveAt, arrTz)}</p>
                     <p style={{ fontSize: 14, fontWeight: 600, color: "#111", fontFamily: "var(--font-geist-mono)" }}>{ticket.toCode}</p>
                     <p style={{ fontSize: 13, color: "#6B6B6B" }}>{ticket.toCity}</p>
-                    <p style={{ fontSize: 12, color: "#9B9B9B", marginTop: 2 }}>{fmtDate(ticket.arriveAt, undefined, false)}</p>
+                    <p style={{ fontSize: 12, color: "#9B9B9B", marginTop: 2 }}>{fmtDate(ticket.arriveAt, arrTz, false)}</p>
                   </div>
                 </div>
+
+                {/* transit / connection */}
+                {ticket.via && (
+                  <div style={{
+                    marginTop: 18, paddingTop: 16, borderTop: "1px solid #E6E6E6",
+                    display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12,
+                  }}>
+                    {[
+                      { k: "Transit", v: `${ticket.via.code} — ${ticket.via.city}` },
+                      { k: "Transit flight", v: ticket.via.flightNumber ?? ticket.flightNumber },
+                      { k: "Arrive transit", v: `${fmtTime(ticket.via.arriveAt, viaTz)} · ${fmtDate(ticket.via.arriveAt, viaTz, false)}` },
+                      { k: "Depart transit", v: `${fmtTime(ticket.via.departAt, viaTz)} · ${fmtDate(ticket.via.departAt, viaTz, false)}` },
+                      { k: "Layover", v: fmtDuration(layoverMin) },
+                    ].map((r) => (
+                      <div key={r.k}>
+                        <p style={{ fontSize: 11, color: "#9B9B9B", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 3 }}>{r.k}</p>
+                        <p style={{ fontSize: 13, color: "#111", fontWeight: 450 }}>{r.v}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -200,6 +228,7 @@ export default function TrackResult({ code }: { code: string }) {
               {[
                 { k: "Passenger", v: ticket.passengerName },
                 { k: "Booking class", v: `${bClass} (${ticket.cabin})` },
+                ...(ticket.via ? [{ k: "Transit", v: `${ticket.via.code} (${ticket.via.city})` }] : []),
                 { k: "Seat assigned", v: ticket.seat ?? "—" },
                 { k: "Fare basis", v: fBasis },
                 { k: "Baggage allowance", v: baggageLabel(ticket.cabin) },

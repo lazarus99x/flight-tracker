@@ -2,6 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { findTicket } from "@/lib/store";
 import { fmtTime, fmtDate } from "@/lib/format";
+import { findAirport } from "@/lib/airports";
 
 export const dynamic = "force-dynamic";
 
@@ -68,10 +69,13 @@ export default async function ConfirmationPage({ params }: { params: { pnr: stri
           >
             <Summary k="Passenger" v={t.passengerName} />
             <Summary k="Flight" v={`${t.airline} ${t.flightNumber}`} />
-            <Summary k="Route" v={`${t.fromCode} → ${t.toCode}`} />
-            <Summary k="Date" v={fmtDate(t.departAt, undefined, false)} />
-            <Summary k="Departure" v={`${fmtTime(t.departAt)}`} />
-            <Summary k="Arrival" v={fmtTime(t.arriveAt)} />
+            <Summary k="Route" v={`${t.fromCode} → ${t.via ? t.via.code + " → " : ""}${t.toCode}`} />
+            <Summary k="Date" v={fmtDate(t.departAt, findAirport(t.fromCode)?.tz, false)} />
+            <Summary k="Departure" v={`${fmtTime(t.departAt, findAirport(t.fromCode)?.tz)}`} />
+            <Summary k="Arrival" v={fmtTime(t.arriveAt, findAirport(t.toCode)?.tz)} />
+            {t.via && (
+              <Summary k="Transit" v={`${t.via.code} (${t.via.city})`} />
+            )}
             <Summary k="Cabin / Seat" v={`${t.cabin} · ${t.seat ?? "-"}`} />
           </div>
 

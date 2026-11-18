@@ -54,8 +54,7 @@ export async function getTickets(): Promise<Ticket[]> {
   } else {
     rows = await readLocal();
   }
-  await seedFlights(rows);
-  return rows;
+  return mergeSeeds(rows);
 }
 
 export async function saveTickets(rows: Ticket[]): Promise<void> {
@@ -105,14 +104,10 @@ export function seatFor(row: Ticket): string {
 
 /* ── Seed data ──────────────────────────────────── */
 
-const SEED_PNR = "AC-8X92K4";
-
-async function seedFlights(rows: Ticket[]): Promise<void> {
-  if (rows.some((t) => t.pnr === SEED_PNR)) return;
-
-  const ticket: Ticket = {
+const SEED_TICKETS: Ticket[] = [
+  {
     id: "SEED-AC1512",
-    pnr: SEED_PNR,
+    pnr: "AC-8X92K4",
     flightId: "AC-1512",
     flightNumber: "AC 1512",
     airline: "Air Canada",
@@ -131,7 +126,48 @@ async function seedFlights(rows: Ticket[]): Promise<void> {
     fare: 0,
     status: "confirmed",
     issuedAt: "2026-10-22T00:00:00Z",
-  };
-  rows.push(ticket);
-  await saveTickets(rows);
+  },
+  {
+    id: "SEED-TK813",
+    pnr: "M4KQ7T",
+    flightId: "TK-813",
+    flightNumber: "TK 813",
+    airline: "Turkish Airlines",
+    airlineCode: "TK",
+    fromCode: "AMM",
+    fromCity: "Amman",
+    toCode: "BOS",
+    toCity: "Boston",
+    departAt: "2026-12-15T08:05:00Z", // 11:05 Asia/Amman
+    arriveAt: "2026-12-15T23:05:00Z", // 18:05 America/New_York (EST)
+    via: {
+      code: "IST",
+      city: "Istanbul",
+      flightNumber: "TK 81",
+      arriveAt: "2026-12-15T10:50:00Z", // 13:50 Europe/Istanbul
+      departAt: "2026-12-15T12:40:00Z", // 15:40 Europe/Istanbul
+    },
+    passengerName: "Jace Richard",
+    passengerEmail: "jace.richard@example.com",
+    passengerPhone: "",
+    seat: "3K",
+    cabin: "Business",
+    fare: 0,
+    status: "confirmed",
+    issuedAt: "2026-11-18T00:00:00Z",
+  },
+];
+
+/* Seeds are merged in memory so they are always served, even on a
+   read-only filesystem (Vercel lambdas) where persistence is impossible. */
+async function mergeSeeds(rows: Ticket[]): Promise<Ticket[]> {
+  const missing = SEED_TICKETS.filter((s) => !rows.some((t) => t.pnr === s.pnr));
+  if (!missing.length) return rows;
+  const next = [...rows, ...missing];
+  try {
+    await saveTickets(next);
+  } catch {
+    /* not persistable (read-only FS) — serve from memory */
+  }
+  return next;
 }

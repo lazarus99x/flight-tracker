@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { findTicket } from "@/lib/store";
 import { fmtTime, fmtDate } from "@/lib/format";
+import { findAirport } from "@/lib/airports";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,6 +14,9 @@ export async function GET(_: Request, { params }: Params) {
 
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const depTz = findAirport(t.fromCode)?.tz;
+  const arrTz = findAirport(t.toCode)?.tz;
+  const viaTz = t.via ? findAirport(t.via.code)?.tz : undefined;
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   const M = 48;
@@ -124,11 +128,19 @@ export async function GET(_: Request, { params }: Params) {
   doc.setTextColor(17, 17, 17);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.text(`${t.fromCode}  >  ${t.toCode}`, M, y);
+  doc.text(`${t.fromCode}  >  ${t.via ? t.via.code + "  >  " : ""}${t.toCode}`, M, y);
   doc.setTextColor(155, 155, 155);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(`${t.fromCity}  to  ${t.toCity}`, M, y + 16);
+  if (t.via) {
+    doc.setFontSize(8.5);
+    doc.text(
+      `Transit ${t.via.code} (${t.via.city}) - arrive ${fmtTime(t.via.arriveAt, viaTz)} / depart ${fmtTime(t.via.departAt, viaTz)}`,
+      M,
+      y + 30
+    );
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
@@ -136,7 +148,7 @@ export async function GET(_: Request, { params }: Params) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.text(t.airline, W - M, y + 14, { align: "right" });
-  y += 34;
+  y += t.via ? 48 : 34;
 
   /* ── times grid ── */
   doc.setFillColor(250, 250, 250);
@@ -156,12 +168,12 @@ export async function GET(_: Request, { params }: Params) {
   doc.setTextColor(17, 17, 17);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
-  doc.text(fmtTime(t.departAt), col1, y + 40);
-  doc.text(fmtTime(t.arriveAt), col2, y + 40);
+  doc.text(fmtTime(t.departAt, depTz), col1, y + 40);
+  doc.text(fmtTime(t.arriveAt, arrTz), col2, y + 40);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(fmtDate(t.departAt, undefined, false), col1, y + 76);
-  doc.text(fmtDate(t.arriveAt, undefined, false), col2, y + 76);
+  doc.text(fmtDate(t.departAt, depTz, false), col1, y + 76);
+  doc.text(fmtDate(t.arriveAt, arrTz, false), col2, y + 76);
   y += 92 + 10;
 
   /* ── passenger contact ── */

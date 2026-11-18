@@ -7,6 +7,14 @@ export type FlightStatus =
   | "delayed"
   | "cancelled";
 
+export type TicketVia = {
+  code: string;
+  city: string;
+  arriveAt: string;
+  departAt: string;
+  flightNumber?: string;
+};
+
 export type Ticket = {
   id: string;
   pnr: string;
@@ -20,6 +28,7 @@ export type Ticket = {
   toCity: string;
   departAt: string;
   arriveAt: string;
+  via?: TicketVia;
   passengerName: string;
   passengerEmail: string;
   passengerPhone?: string;

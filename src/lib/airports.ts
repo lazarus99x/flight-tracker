@@ -25,6 +25,7 @@ export const AIRPORTS: Airport[] = [
   { code: "LIS", city: "Lisbon", country: "Portugal", tz: "Europe/Lisbon" },
   { code: "ATH", city: "Athens", country: "Greece", tz: "Europe/Athens" },
   { code: "IST", city: "Istanbul", country: "Turkey", tz: "Europe/Istanbul" },
+  { code: "AMM", city: "Amman", country: "Jordan", tz: "Asia/Amman" },
   { code: "CPH", city: "Copenhagen", country: "Denmark", tz: "Europe/Copenhagen" },
   { code: "ARN", city: "Stockholm", country: "Sweden", tz: "Europe/Stockholm" },
   { code: "OSL", city: "Oslo", country: "Norway", tz: "Europe/Oslo" },
